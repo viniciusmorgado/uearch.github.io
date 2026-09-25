@@ -12,3 +12,5 @@ Interactive diagram of the 9 layers of Unreal Engine, from game to hardware. Ava
 Direct links: `#en` or `#pt` at the end of the URL open the page in that language.
 
 Hosted with GitHub Pages: just keep `index.html` at the root of the repository.
+
+## Access the flow graph here: https://viniciusmorgado.github.io/uearch.github.io/
