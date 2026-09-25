@@ -1,0 +1,1503 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Interactive diagram of the 9 layers of Unreal Engine, from game to hardware.">
+<style>body{margin:0}img{max-width:100%}</style>
+<title>Unreal Engine Layers</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --bg: #eef1f6;
+    --panel: #ffffff;
+    --ink: #172033;
+    --ink-2: #4a5570;
+    --ink-3: #7a849b;
+    --line: #d5dbe6;
+    --line-2: #e4e8ef;
+    --accent: #1d4ed8;
+    --accent-ink: #ffffff;
+    --accent-soft: #e3eafc;
+    --paper: #fbfcfe;
+    --paper-dot: #dfe4ee;
+    --paper-edge: #cfd6e3;
+    --danger: #b42318;
+    --shadow: 0 1px 2px rgba(23, 32, 51, .06), 0 4px 16px rgba(23, 32, 51, .06);
+    --sans: "IBM Plex Sans", -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --bg: #10141d;
+      --panel: #171c28;
+      --ink: #e7ebf3;
+      --ink-2: #b1b9ca;
+      --ink-3: #7f889c;
+      --line: #2c3446;
+      --line-2: #222938;
+      --accent: #7c9cff;
+      --accent-ink: #0d1220;
+      --accent-soft: #1f2a48;
+      --paper: #f6f7fa;
+      --paper-dot: #dde2eb;
+      --paper-edge: #3a4357;
+      --danger: #ff8a7a;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 6px 20px rgba(0,0,0,.25);
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #10141d;
+    --panel: #171c28;
+    --ink: #e7ebf3;
+    --ink-2: #b1b9ca;
+    --ink-3: #7f889c;
+    --line: #2c3446;
+    --line-2: #222938;
+    --accent: #7c9cff;
+    --accent-ink: #0d1220;
+    --accent-soft: #1f2a48;
+    --paper: #f6f7fa;
+    --paper-dot: #dde2eb;
+    --paper-edge: #3a4357;
+    --danger: #ff8a7a;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 6px 20px rgba(0,0,0,.25);
+  }
+
+  [hidden] { display: none !important; }
+  html, body { height: 100%; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 1.45;
+  }
+  .app {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding-inline: 16px;
+    padding-block: 14px 16px;
+    box-sizing: border-box;
+    min-height: 560px;
+  }
+
+  header.top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 10px 24px;
+  }
+  .ttl h1 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: -.01em;
+    text-wrap: balance;
+  }
+  .ttl p {
+    margin: 2px 0 0;
+    color: var(--ink-2);
+    font-size: 13px;
+  }
+
+  .toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+  }
+  .grp {
+    display: inline-flex;
+    align-items: center;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .grp > * + * { border-left: 1px solid var(--line-2); }
+  button, select {
+    font: inherit;
+    color: inherit;
+  }
+  .btn {
+    appearance: none;
+    background: transparent;
+    border: 0;
+    height: 34px;
+    padding: 0 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink);
+    white-space: nowrap;
+  }
+  .btn:hover { background: var(--accent-soft); }
+  .btn:focus-visible, select:focus-visible, .chip:focus-visible, textarea:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+  }
+  .btn svg { width: 16px; height: 16px; flex: none; }
+  .btn.icon { width: 34px; padding: 0; justify-content: center; }
+  .btn.primary {
+    background: var(--accent);
+    color: var(--accent-ink);
+  }
+  .btn.primary:hover { filter: brightness(1.08); background: var(--accent); }
+  .zoomval {
+    min-width: 54px;
+    text-align: center;
+    font-family: var(--mono);
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink-2);
+    padding: 0 6px;
+    line-height: 34px;
+  }
+  select.scale {
+    appearance: none;
+    background: transparent;
+    border: 0;
+    height: 34px;
+    padding: 0 10px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--ink-2);
+    cursor: pointer;
+  }
+  .btn[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent); }
+
+  .lang {
+    display: inline-flex;
+    padding: 3px;
+    gap: 2px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+  }
+  .lang button {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    height: 28px;
+    padding: 0 10px 0 6px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    font-family: var(--mono);
+    font-size: 11.5px;
+    font-weight: 500;
+    letter-spacing: .04em;
+    color: var(--ink-3);
+  }
+  .lang button:hover { color: var(--ink); }
+  .lang button[aria-pressed="true"] {
+    background: var(--accent-soft);
+    color: var(--ink);
+  }
+  .lang button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .flag {
+    width: 20px;
+    height: 14px;
+    border-radius: 3px;
+    overflow: hidden;
+    flex: none;
+    display: block;
+    box-shadow: 0 0 0 1px rgba(0,0,0,.12);
+    opacity: .6;
+    filter: saturate(.6);
+    transition: opacity .15s, filter .15s;
+  }
+  .lang button[aria-pressed="true"] .flag,
+  .lang button:hover .flag { opacity: 1; filter: none; }
+
+  .flows {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+  }
+  .flows .lbl {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--ink-3);
+    margin-right: 4px;
+  }
+  .chip {
+    appearance: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    height: 28px;
+    padding: 0 10px 0 8px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: var(--panel);
+    color: var(--ink);
+    font: inherit;
+    font-size: 12.5px;
+    cursor: pointer;
+  }
+  .chip:hover { border-color: var(--ink-3); }
+  .chip .sw {
+    width: 18px;
+    height: 0;
+    border-top: 3px solid var(--c);
+    border-radius: 2px;
+  }
+  .chip .sw.dash { border-top: 2px dashed var(--c); }
+  .chip .n { font-family: var(--mono); color: var(--ink-3); font-size: 11.5px; }
+  .chip[aria-pressed="true"] {
+    border-color: var(--c);
+    box-shadow: inset 0 0 0 1px var(--c);
+    background: color-mix(in srgb, var(--c) 12%, var(--panel));
+  }
+  .chip.all[aria-pressed="true"] { --c: var(--accent); }
+
+  .work {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    gap: 12px;
+  }
+  .stage {
+    position: relative;
+    flex: 1;
+    min-width: 0;
+    min-height: 380px;
+    border: 1px solid var(--paper-edge);
+    border-radius: 10px;
+    background-color: var(--paper);
+    background-image: radial-gradient(var(--paper-dot) 1px, transparent 1px);
+    background-size: 18px 18px;
+    overflow: hidden;
+    touch-action: none;
+    cursor: grab;
+    box-shadow: var(--shadow);
+  }
+  .stage.dragging { cursor: grabbing; }
+  #canvas {
+    position: absolute;
+    left: 0;
+    top: 0;
+    transform-origin: 0 0;
+    will-change: transform;
+  }
+  #canvas svg { display: block; max-width: none; }
+  .status {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    color: #4a5570;
+    font-size: 13px;
+    text-align: center;
+    padding: 24px;
+  }
+  .status.err { color: #b42318; }
+  .hint {
+    position: absolute;
+    left: 10px;
+    bottom: 10px;
+    background: rgba(255,255,255,.88);
+    border: 1px solid #dfe4ee;
+    color: #4a5570;
+    border-radius: 6px;
+    padding: 4px 8px;
+    font-size: 11.5px;
+    pointer-events: none;
+  }
+  .hint kbd {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    border: 1px solid #cfd6e3;
+    border-bottom-width: 2px;
+    border-radius: 4px;
+    padding: 0 4px;
+    background: #fff;
+  }
+
+  /* realce de fluxo */
+  #canvas svg.hl .node:not(.on),
+  #canvas svg.hl path.flowchart-link:not(.on),
+  #canvas svg.hl .edgeLabel:not(.on) { opacity: .1; transition: opacity .15s; }
+  #canvas svg .node, #canvas svg path.flowchart-link, #canvas svg .edgeLabel { transition: opacity .15s; }
+
+  .editor {
+    width: 400px;
+    flex: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 12px;
+    box-shadow: var(--shadow);
+    min-height: 0;
+  }
+  .editor header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .editor h2 {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .editor .sub { color: var(--ink-3); font-size: 12px; margin: 0; }
+  .editor textarea {
+    flex: 1;
+    min-height: 240px;
+    resize: none;
+    width: 100%;
+    box-sizing: border-box;
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--ink);
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 10px;
+    tab-size: 2;
+    white-space: pre;
+    overflow: auto;
+  }
+  .editor .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .editor .row .grp .btn { height: 32px; }
+  .editor .err {
+    color: var(--danger);
+    font-family: var(--mono);
+    font-size: 11.5px;
+    white-space: pre-wrap;
+    max-height: 90px;
+    overflow: auto;
+    margin: 0;
+  }
+
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: calc(18px + env(safe-area-inset-bottom, 0px));
+    transform: translateX(-50%);
+    background: var(--ink);
+    color: var(--bg);
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    box-shadow: var(--shadow);
+    z-index: 10;
+    max-width: calc(100% - 32px);
+  }
+
+  @media (max-width: 860px) {
+    .work { flex-direction: column; }
+    .editor { width: auto; max-height: 55vh; }
+    .editor textarea { min-height: 180px; }
+  }
+  @media (max-width: 520px) {
+    .btn .t { display: none; }
+    .btn:not(.icon) { padding: 0 10px; }
+    .hint { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    #canvas svg .node, #canvas svg path.flowchart-link, #canvas svg .edgeLabel { transition: none; }
+  }
+</style>
+
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="ttl">
+      <h1 data-i18n="title">Unreal Engine Layers</h1>
+      <p data-i18n="subtitle">From game to hardware: 9 layers and the flows that cross them.</p>
+    </div>
+    <div class="toolbar" role="toolbar" data-i18n-aria="toolbar" aria-label="Diagram controls">
+      <div class="grp">
+        <button class="btn icon" id="zoomOut" type="button" data-i18n-title="zoomOutT" data-i18n-aria="zoomOut" title="Zoom out (−)" aria-label="Zoom out">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3.5 8h9"/></svg>
+        </button>
+        <span class="zoomval" id="zoomVal" aria-live="polite">100%</span>
+        <button class="btn icon" id="zoomIn" type="button" data-i18n-title="zoomInT" data-i18n-aria="zoomIn" title="Zoom in (+)" aria-label="Zoom in">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3.5 8h9M8 3.5v9"/></svg>
+        </button>
+        <button class="btn" id="fit" type="button" data-i18n-title="fitT" title="Fit to screen (0)">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2.5 6V2.5H6M10 2.5h3.5V6M13.5 10v3.5H10M6 13.5H2.5V10"/></svg>
+          <span class="t" data-i18n="fit">Fit</span>
+        </button>
+        <button class="btn" id="actual" type="button" data-i18n-title="actualT" title="Actual size (1)"><span>1:1</span></button>
+      </div>
+      <div class="grp">
+        <button class="btn" id="dlSvg" type="button" data-i18n-title="svgT" title="Download as SVG (vector)">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 2.5v8M4.5 7 8 10.5 11.5 7M3 13.5h10"/></svg>
+          <span>SVG</span>
+        </button>
+        <button class="btn" id="dlPng" type="button" data-i18n-title="pngT" title="Download as PNG">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 2.5v8M4.5 7 8 10.5 11.5 7M3 13.5h10"/></svg>
+          <span>PNG</span>
+        </button>
+        <select class="scale" id="pngScale" data-i18n-title="scaleT" data-i18n-aria="scaleT" aria-label="PNG resolution" title="PNG resolution">
+          <option value="1">1×</option>
+          <option value="2" selected>2×</option>
+          <option value="3">3×</option>
+          <option value="4">4×</option>
+        </select>
+      </div>
+      <div class="grp">
+        <button class="btn" id="toggleEditor" type="button" aria-pressed="false" aria-controls="editor" data-i18n-title="codeT" title="Edit the Mermaid code">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5.5 4.5 2 8l3.5 3.5M10.5 4.5 14 8l-3.5 3.5"/></svg>
+          <span class="t" data-i18n="code">Code</span>
+        </button>
+      </div>
+      <div class="lang" role="group" data-i18n-aria="langAria" aria-label="Language">
+        <button type="button" data-lang="en" aria-pressed="true" title="English">
+          <svg class="flag" viewBox="0 0 38 26" aria-hidden="true"><rect width="38" height="26" fill="#b22234"/><g fill="#fff"><rect y="2" width="38" height="2"/><rect y="6" width="38" height="2"/><rect y="10" width="38" height="2"/><rect y="14" width="38" height="2"/><rect y="18" width="38" height="2"/><rect y="22" width="38" height="2"/></g><rect width="17" height="14" fill="#3c3b6e"/><g fill="#fff"><circle cx="3" cy="3" r=".9"/><circle cx="8.5" cy="3" r=".9"/><circle cx="14" cy="3" r=".9"/><circle cx="5.7" cy="7" r=".9"/><circle cx="11.3" cy="7" r=".9"/><circle cx="3" cy="11" r=".9"/><circle cx="8.5" cy="11" r=".9"/><circle cx="14" cy="11" r=".9"/></g></svg>
+          EN
+        </button>
+        <button type="button" data-lang="pt" aria-pressed="false" title="Português">
+          <svg class="flag" viewBox="0 0 38 26" aria-hidden="true"><rect width="38" height="26" fill="#009c3b"/><path d="M19 3 35 13 19 23 3 13Z" fill="#ffdf00"/><circle cx="19" cy="13" r="6" fill="#002776"/><path d="M13.2 11.6c3.9-.6 8.2.1 11.6 2.1l-.3 1c-3.3-1.9-7.4-2.6-11.2-2Z" fill="#fff"/></svg>
+          PT
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <nav class="flows" id="flows" data-i18n-aria="flowsAria" aria-label="Highlight a flow">
+    <span class="lbl" data-i18n="flows">Flows</span>
+  </nav>
+
+  <div class="work">
+    <div class="stage" id="stage" tabindex="0" data-i18n-aria="stageAria" aria-label="Diagram: drag to move, use the controls to zoom">
+      <div id="canvas"></div>
+      <div class="status" id="status">Drawing the diagram…</div>
+      <div class="hint" id="hint" data-i18n-html="hint">Drag to move · <kbd>Ctrl</kbd> + wheel or pinch to zoom</div>
+    </div>
+
+    <aside class="editor" id="editor" hidden>
+      <header>
+        <div>
+          <h2 data-i18n="codeTitle">Mermaid code</h2>
+          <p class="sub" data-i18n-html="codeSub">Edit and apply to redraw. <span style="font-family:var(--mono)">Ctrl + Enter</span> also applies.</p>
+        </div>
+      </header>
+      <textarea id="code" spellcheck="false" data-i18n-aria="codeTitle" aria-label="Mermaid code"></textarea>
+      <pre class="err" id="codeErr" hidden></pre>
+      <div class="row">
+        <div class="grp"><button class="btn primary" id="apply" type="button" data-i18n="apply">Apply</button></div>
+        <div class="grp"><button class="btn" id="reset" type="button" data-i18n="reset">Restore original</button></div>
+        <div class="grp"><button class="btn" id="copy" type="button" data-i18n="copy">Copy</button></div>
+        <div class="grp"><button class="btn" id="dlMmd" type="button" data-i18n="dlTxt">Download .txt</button></div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<div class="toast" id="toast" hidden></div>
+
+<script type="text/plain" id="source-en">%%{init: {"flowchart": {"curve": "basis", "nodeSpacing": 26, "rankSpacing": 40}, "themeVariables": {"fontSize": "13px"}} }%%
+flowchart TB
+
+  subgraph L9["⑨ GAME / APPLICATION"]
+    APP_GAME["<b>Your game</b><br/>Project C++ · Blueprints<br/>maps · assets · plugins"]
+    APP_ED["<b>EDITOR</b> (WITH_EDITOR)<br/>UnrealEd · Slate tools<br/><i>→ detailed in diagram 3</i>"]
+  end
+
+  subgraph L8["⑧ GAMEPLAY FRAMEWORK"]
+    GF_ACT["<b>AActor</b> + components<br/>USceneComponent · UPrimitiveComponent<br/>UAudioComponent"]
+    GF_MODE["AGameModeBase · AGameStateBase<br/>APlayerState · UGameInstance"]
+    GF_PAWN["APawn / ACharacter<br/>UCharacterMovementComponent"]
+    GF_PC["<b>APlayerController</b><br/>Enhanced Input"]
+  end
+
+  subgraph L7["⑦ ENGINE SUBSYSTEMS"]
+    SU_PHYS["<b>Physics bridge</b> (Engine module)<br/>FBodyInstance · FPhysScene_Chaos<br/>UPrimitiveComponent collision"]
+    SU_REND["<b>Renderer</b><br/>FScene · Deferred / Mobile<br/>Nanite · Lumen · VSM"]
+    SU_RC["<b>RenderCore</b><br/>RDG · shaders · render thread"]
+    SU_AUD["<b>Audio</b> — AudioMixer<br/>FAudioDevice · MetaSounds · submixes"]
+    SU_NET["<b>Networking</b><br/>UNetDriver / UIpNetDriver<br/>UNetConnection · replication (Iris)"]
+    SU_MISC["Animation · UMG · Niagara<br/>AI / Navigation · Landscape"]
+  end
+
+  subgraph L6["⑥ ENGINE CORE"]
+    CO_WORLD["<b>UWorld · ULevel</b><br/>FTickTaskManager<br/>(tick groups)"]
+    CO_LOOP["<b>FEngineLoop / UEngine</b><br/>UGameEngine | UEditorEngine<br/>main loop"]
+    CO_UOBJ["<b>CoreUObject</b><br/>UObject · UClass (reflection)<br/>GC · serialization"]
+    CO_ASSET["<b>Asset loading</b><br/>AsyncLoading2 (Zen)<br/>StreamableManager · AssetRegistry"]
+    CO_SLATE["<b>FSlateApplication</b><br/>→ UGameViewportClient<br/>input routing"]
+  end
+
+  subgraph L5["⑤ ABSTRACTION LAYERS — platform- / API-agnostic interfaces"]
+    AB_PHYS["<b>PhysicsCore</b><br/>PHYSICS ABSTRACTION<br/>FPhysicsInterface → FPhysInterface_Chaos<br/>FChaosEngineInterface · scene queries"]
+    AB_RHI["<b>RHI</b> + RHICore<br/>FDynamicRHI · IRHICommandContext<br/>FRHICommandList · PSO cache"]
+    AB_AUD["<b>AudioMixerCore</b><br/>IAudioMixerPlatformInterface"]
+    AB_NET["<b>Sockets</b><br/>ISocketSubsystem · FSocket"]
+    AB_IO["<b>I/O</b><br/>FIoDispatcher (IoStore)<br/>PakFile · IPlatformFile"]
+    AB_HAL["<b>Core / HAL</b> + GenericPlatform<br/>FPlatformMisc · Memory · Time<br/>FRunnable · TaskGraph · SIMD"]
+    AB_APP["<b>ApplicationCore</b><br/>FGenericApplication<br/>IInputDevice"]
+  end
+
+  subgraph L4["④ UE BACKENDS — ★ BACKENDS START HERE (API- / platform- / vendor-specific UE code)"]
+    BE_PHYS["<b>CHAOS</b><br/>PHYSICS ENGINE<br/>rigid solver · collision · destruction<br/>cloth · vehicles · fields<br/>(runs on the CPU, does not use the RHI)"]
+    BE_RHI["<b>RHI backends</b><br/>VulkanRHI · D3D12RHI · D3D11RHI<br/>MetalRHI · OpenGLDrv · NullDrv"]
+    BE_AUD["<b>Audio backends</b><br/>AudioMixerXAudio2 · Wasapi · SDL<br/>CoreAudio / AudioUnit · Android"]
+    BE_NET["<b>Socket subsystems</b><br/>Windows · BSD · Android …"]
+    BE_PLAT["<b>Platform</b><br/>FWindowsPlatform* · FUnixPlatform*<br/>FAndroidPlatform* · FApplePlatform*<br/>FWindowsApplication · SDL3 (Linux)"]
+  end
+
+  subgraph L3["③ GRAPHICS AND SYSTEM APIs — external to UE"]
+    API_GFX["<b>Graphics APIs</b><br/>Vulkan · Direct3D 12/11<br/>Metal · OpenGL ES"]
+    API_AUD["Audio APIs<br/>XAudio2 · WASAPI<br/>CoreAudio · AAudio"]
+    API_NET["Sockets<br/>BSD / Winsock"]
+    API_FILE["Files<br/>Win32 · POSIX<br/>DirectStorage"]
+    API_WIN["Windows / events<br/>Win32 · X11 / Wayland<br/>Cocoa · NDK"]
+  end
+
+  subgraph L2["② OPERATING SYSTEM / DRIVERS"]
+    OS_GPU["GPU driver<br/>+ Vulkan loader / D3D runtime"]
+    OS_AUD["Audio driver /<br/>server"]
+    OS_NET["TCP/IP stack"]
+    OS_FS["File<br/>system"]
+    OS_K["OS kernel<br/>Windows · Linux · Android<br/>macOS / iOS · consoles"]
+    OS_HID["HID drivers<br/>Raw Input · evdev · GameInput"]
+  end
+
+  subgraph L1["① HARDWARE"]
+    HW_CPU["Multi-core CPU<br/>SIMD · RAM"]
+    HW_GPU["GPU · VRAM"]
+    HW_AUD["Audio output"]
+    HW_NIC["Network card"]
+    HW_STO["SSD / storage"]
+    HW_IN["Input devices<br/>keyboard · mouse · gamepad<br/>touch · XR"]
+  end
+
+  %% invisible backbone: pins the layer order (links 0-7)
+  L9 ~~~ L8 ~~~ L7 ~~~ L6 ~~~ L5 ~~~ L4 ~~~ L3 ~~~ L2 ~~~ L1
+
+  %% ② TICK (8-9)
+  CO_LOOP -->|"② Tick"| CO_WORLD
+  CO_WORLD -->|"② TickActor / TickComponent"| GF_ACT
+
+  %% ③ RENDER (10-17)
+  CO_LOOP -->|"③ Draw → BeginRenderingViewFamily"| SU_REND
+  GF_ACT -->|"③ scene proxies"| SU_REND
+  SU_REND -->|"③ RDG passes"| SU_RC
+  SU_RC -->|"③ command lists"| AB_RHI
+  AB_RHI -->|"③"| BE_RHI
+  BE_RHI -->|"③ vkCmd* · submit · present"| API_GFX
+  API_GFX -->|"③"| OS_GPU
+  OS_GPU -->|"③"| HW_GPU
+
+  %% ④ PHYSICS (18-22)
+  CO_WORLD -->|"④ StartPhysics / EndPhysics"| SU_PHYS
+  GF_ACT -->|"④ bodies · forces · queries"| SU_PHYS
+  SU_PHYS -->|"④"| AB_PHYS
+  AB_PHYS -->|"④ implemented by"| BE_PHYS
+  BE_PHYS -->|"④ solver via TaskGraph / SIMD"| HW_CPU
+
+  %% ⑤ AUDIO (23-28)
+  GF_ACT -->|"⑤ sounds"| SU_AUD
+  SU_AUD -->|"⑤ mixed buffers"| AB_AUD
+  AB_AUD -->|"⑤"| BE_AUD
+  BE_AUD -->|"⑤"| API_AUD
+  API_AUD -->|"⑤"| OS_AUD
+  OS_AUD -->|"⑤"| HW_AUD
+
+  %% ⑥ ASSETS (29-34)
+  CO_ASSET -->|"⑥ deserializes UObjects"| CO_UOBJ
+  CO_ASSET -->|"⑥ async read"| AB_IO
+  AB_IO -->|"⑥"| BE_PLAT
+  BE_PLAT -->|"⑥"| API_FILE
+  API_FILE -->|"⑥"| OS_FS
+  OS_FS -->|"⑥"| HW_STO
+
+  %% ⑦ NETWORKING (35-40)
+  GF_ACT <-->|"⑦ replication · RPC"| SU_NET
+  SU_NET <-->|"⑦ packets"| AB_NET
+  AB_NET <-->|"⑦"| BE_NET
+  BE_NET <-->|"⑦"| API_NET
+  API_NET <-->|"⑦"| OS_NET
+  OS_NET <-->|"⑦"| HW_NIC
+
+  %% ① INPUT — goes up (41-47)
+  HW_IN -->|"① input"| OS_HID
+  OS_HID -->|"①"| API_WIN
+  API_WIN -->|"① OS messages"| BE_PLAT
+  BE_PLAT -->|"①"| AB_APP
+  AB_APP -->|"① events"| CO_SLATE
+  CO_SLATE -->|"① InputKey"| GF_PC
+  GF_PC -->|"① Possess · commands"| GF_PAWN
+
+  %% structure / dependency (48-54)
+  APP_GAME -.->|"C++ / BP subclasses"| GF_ACT
+  APP_ED -.->|"UEditorEngine"| CO_LOOP
+  GF_MODE -.->|"spawns"| GF_PC
+  CO_UOBJ -.-> AB_HAL
+  AB_HAL -.->|"implemented by"| BE_PLAT
+  BE_PLAT -.-> OS_K
+  OS_K -.-> HW_CPU
+
+  linkStyle 8,9 stroke:#7c3aed,stroke-width:2.5px
+  linkStyle 10,11,12,13,14,15,16,17 stroke:#16a34a,stroke-width:2.5px
+  linkStyle 18,19,20,21,22 stroke:#ea580c,stroke-width:2.5px
+  linkStyle 23,24,25,26,27,28 stroke:#db2777,stroke-width:2.5px
+  linkStyle 29,30,31,32,33,34 stroke:#0891b2,stroke-width:2.5px
+  linkStyle 35,36,37,38,39,40 stroke:#a16207,stroke-width:2.5px
+  linkStyle 41,42,43,44,45,46,47 stroke:#2563eb,stroke-width:2.5px
+  linkStyle 48,49,50,51,52,53,54 stroke:#9ca3af,stroke-width:1.5px
+
+  classDef hw fill:#374151,stroke:#111827,color:#fff
+  classDef os fill:#9ca3af,stroke:#4b5563,color:#111
+  classDef api fill:#e5e7eb,stroke:#6b7280,color:#111
+  classDef backend fill:#fde68a,stroke:#b45309,color:#111,stroke-width:2px
+  classDef abs fill:#bfdbfe,stroke:#1d4ed8,color:#111,stroke-width:2px
+  classDef core fill:#c7d2fe,stroke:#4338ca,color:#111
+  classDef sub fill:#bbf7d0,stroke:#15803d,color:#111
+  classDef gf fill:#fbcfe8,stroke:#be185d,color:#111
+  classDef app fill:#ddd6fe,stroke:#6d28d9,color:#111
+  classDef editor fill:#fecaca,stroke:#b91c1c,color:#111,stroke-dasharray:4 3
+  classDef physEngine fill:#ea580c,stroke:#7c2d12,color:#fff,stroke-width:3px
+  classDef physAbs fill:#fed7aa,stroke:#ea580c,color:#111,stroke-width:3px
+
+  class HW_IN,HW_CPU,HW_GPU,HW_AUD,HW_NIC,HW_STO hw
+  class OS_HID,OS_K,OS_GPU,OS_AUD,OS_NET,OS_FS os
+  class API_WIN,API_GFX,API_AUD,API_NET,API_FILE api
+  class BE_PLAT,BE_RHI,BE_AUD,BE_NET backend
+  class AB_HAL,AB_APP,AB_RHI,AB_AUD,AB_NET,AB_IO abs
+  class CO_LOOP,CO_WORLD,CO_SLATE,CO_ASSET,CO_UOBJ core
+  class SU_REND,SU_RC,SU_AUD,SU_NET,SU_MISC sub
+  class GF_MODE,GF_PC,GF_PAWN,GF_ACT gf
+  class APP_GAME app
+  class APP_ED editor
+  class BE_PHYS physEngine
+  class AB_PHYS,SU_PHYS physAbs
+
+  style L9 fill:#faf5ff,stroke:#6d28d9
+  style L8 fill:#fdf2f8,stroke:#be185d
+  style L7 fill:#f0fdf4,stroke:#15803d
+  style L6 fill:#eef2ff,stroke:#4338ca
+  style L5 fill:#eff6ff,stroke:#1d4ed8,stroke-width:3px
+  style L4 fill:#fffbeb,stroke:#b45309,stroke-width:3px,stroke-dasharray:8 4
+  style L3 fill:#f9fafb,stroke:#6b7280
+  style L2 fill:#f3f4f6,stroke:#4b5563
+  style L1 fill:#e5e7eb,stroke:#111827</script>
+<script type="text/plain" id="source-pt">%%{init: {"flowchart": {"curve": "basis", "nodeSpacing": 26, "rankSpacing": 40}, "themeVariables": {"fontSize": "13px"}} }%%
+flowchart TB
+
+  subgraph L9["⑨ JOGO / APLICAÇÃO"]
+    APP_GAME["<b>Seu jogo</b><br/>C++ do projeto · Blueprints<br/>mapas · assets · plugins"]
+    APP_ED["<b>EDITOR</b> (WITH_EDITOR)<br/>UnrealEd · ferramentas Slate<br/><i>→ detalhado no diagrama 3</i>"]
+  end
+
+  subgraph L8["⑧ GAMEPLAY FRAMEWORK"]
+    GF_ACT["<b>AActor</b> + componentes<br/>USceneComponent · UPrimitiveComponent<br/>UAudioComponent"]
+    GF_MODE["AGameModeBase · AGameStateBase<br/>APlayerState · UGameInstance"]
+    GF_PAWN["APawn / ACharacter<br/>UCharacterMovementComponent"]
+    GF_PC["<b>APlayerController</b><br/>Enhanced Input"]
+  end
+
+  subgraph L7["⑦ SUBSISTEMAS DA ENGINE"]
+    SU_PHYS["<b>Ponte de física</b> (módulo Engine)<br/>FBodyInstance · FPhysScene_Chaos<br/>colisão de UPrimitiveComponent"]
+    SU_REND["<b>Renderer</b><br/>FScene · Deferred / Mobile<br/>Nanite · Lumen · VSM"]
+    SU_RC["<b>RenderCore</b><br/>RDG · shaders · render thread"]
+    SU_AUD["<b>Áudio</b> — AudioMixer<br/>FAudioDevice · MetaSounds · submixes"]
+    SU_NET["<b>Rede</b><br/>UNetDriver / UIpNetDriver<br/>UNetConnection · replicação (Iris)"]
+    SU_MISC["Animação · UMG · Niagara<br/>AI / Navegação · Landscape"]
+  end
+
+  subgraph L6["⑥ CORE DA ENGINE"]
+    CO_WORLD["<b>UWorld · ULevel</b><br/>FTickTaskManager<br/>(tick groups)"]
+    CO_LOOP["<b>FEngineLoop / UEngine</b><br/>UGameEngine | UEditorEngine<br/>loop principal"]
+    CO_UOBJ["<b>CoreUObject</b><br/>UObject · UClass (reflexão)<br/>GC · serialização"]
+    CO_ASSET["<b>Carregamento de assets</b><br/>AsyncLoading2 (Zen)<br/>StreamableManager · AssetRegistry"]
+    CO_SLATE["<b>FSlateApplication</b><br/>→ UGameViewportClient<br/>roteamento de input"]
+  end
+
+  subgraph L5["⑤ CAMADAS DE ABSTRAÇÃO — interfaces agnósticas de plataforma / API"]
+    AB_PHYS["<b>PhysicsCore</b><br/>ABSTRAÇÃO DE FÍSICA<br/>FPhysicsInterface → FPhysInterface_Chaos<br/>FChaosEngineInterface · scene queries"]
+    AB_RHI["<b>RHI</b> + RHICore<br/>FDynamicRHI · IRHICommandContext<br/>FRHICommandList · PSO cache"]
+    AB_AUD["<b>AudioMixerCore</b><br/>IAudioMixerPlatformInterface"]
+    AB_NET["<b>Sockets</b><br/>ISocketSubsystem · FSocket"]
+    AB_IO["<b>I/O</b><br/>FIoDispatcher (IoStore)<br/>PakFile · IPlatformFile"]
+    AB_HAL["<b>Core / HAL</b> + GenericPlatform<br/>FPlatformMisc · Memory · Time<br/>FRunnable · TaskGraph · SIMD"]
+    AB_APP["<b>ApplicationCore</b><br/>FGenericApplication<br/>IInputDevice"]
+  end
+
+  subgraph L4["④ BACKENDS DA UE — ★ OS BACKENDS COMEÇAM AQUI (código UE específico de API / plataforma / fornecedor)"]
+    BE_PHYS["<b>CHAOS</b><br/>MOTOR DE FÍSICA<br/>solver rígido · colisão · destruição<br/>cloth · veículos · campos<br/>(roda na CPU, não usa RHI)"]
+    BE_RHI["<b>Backends RHI</b><br/>VulkanRHI · D3D12RHI · D3D11RHI<br/>MetalRHI · OpenGLDrv · NullDrv"]
+    BE_AUD["<b>Backends de áudio</b><br/>AudioMixerXAudio2 · Wasapi · SDL<br/>CoreAudio / AudioUnit · Android"]
+    BE_NET["<b>Socket subsystems</b><br/>Windows · BSD · Android …"]
+    BE_PLAT["<b>Plataforma</b><br/>FWindowsPlatform* · FUnixPlatform*<br/>FAndroidPlatform* · FApplePlatform*<br/>FWindowsApplication · SDL3 (Linux)"]
+  end
+
+  subgraph L3["③ APIs GRÁFICAS E DE SISTEMA — externas à UE"]
+    API_GFX["<b>APIs gráficas</b><br/>Vulkan · Direct3D 12/11<br/>Metal · OpenGL ES"]
+    API_AUD["APIs de áudio<br/>XAudio2 · WASAPI<br/>CoreAudio · AAudio"]
+    API_NET["Sockets<br/>BSD / Winsock"]
+    API_FILE["Arquivos<br/>Win32 · POSIX<br/>DirectStorage"]
+    API_WIN["Janelas / eventos<br/>Win32 · X11 / Wayland<br/>Cocoa · NDK"]
+  end
+
+  subgraph L2["② SISTEMA OPERACIONAL / DRIVERS"]
+    OS_GPU["Driver de GPU<br/>+ loader Vulkan / runtime D3D"]
+    OS_AUD["Driver / servidor<br/>de áudio"]
+    OS_NET["Pilha TCP/IP"]
+    OS_FS["Sistema de<br/>arquivos"]
+    OS_K["Kernel do SO<br/>Windows · Linux · Android<br/>macOS / iOS · consoles"]
+    OS_HID["Drivers HID<br/>Raw Input · evdev · GameInput"]
+  end
+
+  subgraph L1["① HARDWARE"]
+    HW_CPU["CPU multi-core<br/>SIMD · RAM"]
+    HW_GPU["GPU · VRAM"]
+    HW_AUD["Saída de áudio"]
+    HW_NIC["Placa de rede"]
+    HW_STO["SSD / storage"]
+    HW_IN["Dispositivos de input<br/>teclado · mouse · gamepad<br/>touch · XR"]
+  end
+
+  %% backbone invisível: fixa a ordem das camadas (links 0-7)
+  L9 ~~~ L8 ~~~ L7 ~~~ L6 ~~~ L5 ~~~ L4 ~~~ L3 ~~~ L2 ~~~ L1
+
+  %% ② TICK (8-9)
+  CO_LOOP -->|"② Tick"| CO_WORLD
+  CO_WORLD -->|"② TickActor / TickComponent"| GF_ACT
+
+  %% ③ RENDER (10-17)
+  CO_LOOP -->|"③ Draw → BeginRenderingViewFamily"| SU_REND
+  GF_ACT -->|"③ scene proxies"| SU_REND
+  SU_REND -->|"③ passes RDG"| SU_RC
+  SU_RC -->|"③ command lists"| AB_RHI
+  AB_RHI -->|"③"| BE_RHI
+  BE_RHI -->|"③ vkCmd* · submit · present"| API_GFX
+  API_GFX -->|"③"| OS_GPU
+  OS_GPU -->|"③"| HW_GPU
+
+  %% ④ FÍSICA (18-22)
+  CO_WORLD -->|"④ StartPhysics / EndPhysics"| SU_PHYS
+  GF_ACT -->|"④ corpos · forças · queries"| SU_PHYS
+  SU_PHYS -->|"④"| AB_PHYS
+  AB_PHYS -->|"④ implementada por"| BE_PHYS
+  BE_PHYS -->|"④ solver via TaskGraph / SIMD"| HW_CPU
+
+  %% ⑤ ÁUDIO (23-28)
+  GF_ACT -->|"⑤ sons"| SU_AUD
+  SU_AUD -->|"⑤ buffers mixados"| AB_AUD
+  AB_AUD -->|"⑤"| BE_AUD
+  BE_AUD -->|"⑤"| API_AUD
+  API_AUD -->|"⑤"| OS_AUD
+  OS_AUD -->|"⑤"| HW_AUD
+
+  %% ⑥ ASSETS (29-34)
+  CO_ASSET -->|"⑥ desserializa UObjects"| CO_UOBJ
+  CO_ASSET -->|"⑥ leitura async"| AB_IO
+  AB_IO -->|"⑥"| BE_PLAT
+  BE_PLAT -->|"⑥"| API_FILE
+  API_FILE -->|"⑥"| OS_FS
+  OS_FS -->|"⑥"| HW_STO
+
+  %% ⑦ REDE (35-40)
+  GF_ACT <-->|"⑦ replicação · RPC"| SU_NET
+  SU_NET <-->|"⑦ pacotes"| AB_NET
+  AB_NET <-->|"⑦"| BE_NET
+  BE_NET <-->|"⑦"| API_NET
+  API_NET <-->|"⑦"| OS_NET
+  OS_NET <-->|"⑦"| HW_NIC
+
+  %% ① INPUT — sobe (41-47)
+  HW_IN -->|"① input"| OS_HID
+  OS_HID -->|"①"| API_WIN
+  API_WIN -->|"① mensagens do SO"| BE_PLAT
+  BE_PLAT -->|"①"| AB_APP
+  AB_APP -->|"① eventos"| CO_SLATE
+  CO_SLATE -->|"① InputKey"| GF_PC
+  GF_PC -->|"① Possess · comandos"| GF_PAWN
+
+  %% estrutura / dependência (48-54)
+  APP_GAME -.->|"subclasses C++ / BP"| GF_ACT
+  APP_ED -.->|"UEditorEngine"| CO_LOOP
+  GF_MODE -.->|"spawna"| GF_PC
+  CO_UOBJ -.-> AB_HAL
+  AB_HAL -.->|"implementada por"| BE_PLAT
+  BE_PLAT -.-> OS_K
+  OS_K -.-> HW_CPU
+
+  linkStyle 8,9 stroke:#7c3aed,stroke-width:2.5px
+  linkStyle 10,11,12,13,14,15,16,17 stroke:#16a34a,stroke-width:2.5px
+  linkStyle 18,19,20,21,22 stroke:#ea580c,stroke-width:2.5px
+  linkStyle 23,24,25,26,27,28 stroke:#db2777,stroke-width:2.5px
+  linkStyle 29,30,31,32,33,34 stroke:#0891b2,stroke-width:2.5px
+  linkStyle 35,36,37,38,39,40 stroke:#a16207,stroke-width:2.5px
+  linkStyle 41,42,43,44,45,46,47 stroke:#2563eb,stroke-width:2.5px
+  linkStyle 48,49,50,51,52,53,54 stroke:#9ca3af,stroke-width:1.5px
+
+  classDef hw fill:#374151,stroke:#111827,color:#fff
+  classDef os fill:#9ca3af,stroke:#4b5563,color:#111
+  classDef api fill:#e5e7eb,stroke:#6b7280,color:#111
+  classDef backend fill:#fde68a,stroke:#b45309,color:#111,stroke-width:2px
+  classDef abs fill:#bfdbfe,stroke:#1d4ed8,color:#111,stroke-width:2px
+  classDef core fill:#c7d2fe,stroke:#4338ca,color:#111
+  classDef sub fill:#bbf7d0,stroke:#15803d,color:#111
+  classDef gf fill:#fbcfe8,stroke:#be185d,color:#111
+  classDef app fill:#ddd6fe,stroke:#6d28d9,color:#111
+  classDef editor fill:#fecaca,stroke:#b91c1c,color:#111,stroke-dasharray:4 3
+  classDef physEngine fill:#ea580c,stroke:#7c2d12,color:#fff,stroke-width:3px
+  classDef physAbs fill:#fed7aa,stroke:#ea580c,color:#111,stroke-width:3px
+
+  class HW_IN,HW_CPU,HW_GPU,HW_AUD,HW_NIC,HW_STO hw
+  class OS_HID,OS_K,OS_GPU,OS_AUD,OS_NET,OS_FS os
+  class API_WIN,API_GFX,API_AUD,API_NET,API_FILE api
+  class BE_PLAT,BE_RHI,BE_AUD,BE_NET backend
+  class AB_HAL,AB_APP,AB_RHI,AB_AUD,AB_NET,AB_IO abs
+  class CO_LOOP,CO_WORLD,CO_SLATE,CO_ASSET,CO_UOBJ core
+  class SU_REND,SU_RC,SU_AUD,SU_NET,SU_MISC sub
+  class GF_MODE,GF_PC,GF_PAWN,GF_ACT gf
+  class APP_GAME app
+  class APP_ED editor
+  class BE_PHYS physEngine
+  class AB_PHYS,SU_PHYS physAbs
+
+  style L9 fill:#faf5ff,stroke:#6d28d9
+  style L8 fill:#fdf2f8,stroke:#be185d
+  style L7 fill:#f0fdf4,stroke:#15803d
+  style L6 fill:#eef2ff,stroke:#4338ca
+  style L5 fill:#eff6ff,stroke:#1d4ed8,stroke-width:3px
+  style L4 fill:#fffbeb,stroke:#b45309,stroke-width:3px,stroke-dasharray:8 4
+  style L3 fill:#f9fafb,stroke:#6b7280
+  style L2 fill:#f3f4f6,stroke:#4b5563
+  style L1 fill:#e5e7eb,stroke:#111827</script>
+
+<script>
+(function () {
+  "use strict";
+
+  var DIAGRAM_FONT = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
+  function readSrc(id) { return document.getElementById(id).textContent.replace(/^\s+|\s+$/g, "") + "\n"; }
+  var ORIGINAL = { en: readSrc("source-en"), pt: readSrc("source-pt") };
+
+  // ---------- textos ----------
+  var I18N = {
+    en: {
+      docTitle: "Unreal Engine Layers",
+      title: "Unreal Engine Layers",
+      subtitle: "From game to hardware: 9 layers and the flows that cross them.",
+      toolbar: "Diagram controls",
+      zoomOut: "Zoom out", zoomOutT: "Zoom out (−)",
+      zoomIn: "Zoom in", zoomInT: "Zoom in (+)",
+      fit: "Fit", fitT: "Fit to screen (0)",
+      actualT: "Actual size (1)",
+      svgT: "Download as SVG (vector)",
+      pngT: "Download as PNG",
+      scaleT: "PNG resolution",
+      code: "Code", codeT: "Edit the Mermaid code",
+      flows: "Flows", flowsAria: "Highlight a flow", all: "All",
+      stageAria: "Diagram: drag to move, use the controls to zoom",
+      hint: "Drag to move · <kbd>Ctrl</kbd> + wheel or pinch to zoom",
+      codeTitle: "Mermaid code",
+      codeSub: 'Edit and apply to redraw. <span style="font-family:var(--mono)">Ctrl + Enter</span> also applies.',
+      apply: "Apply", reset: "Restore original", copy: "Copy", dlTxt: "Download .txt",
+      langAria: "Language",
+      drawing: "Drawing the diagram…",
+      loadFail: "Could not load the Mermaid library. Check your connection and reload the page.",
+      saved: "File saved: ",
+      declined: "Download canceled.",
+      rateLimited: "A download is already waiting for confirmation.",
+      tooLarge: "File too large. Try a lower resolution.",
+      dlFail: "Could not download here",
+      notReady: "The diagram has not been drawn yet.",
+      makingPng: "Creating PNG…",
+      pngFail: "This browser could not create the PNG. Download the SVG instead.",
+      updated: "Diagram updated.",
+      copied: "Code copied.",
+      selected: "Selected. Press Ctrl + C to copy.",
+      file: "unreal-engine-layers",
+      flowNames: { "1": "Input", "2": "Tick", "3": "Render", "4": "Physics", "5": "Audio", "6": "Assets", "7": "Networking", s: "Structure" }
+    },
+    pt: {
+      docTitle: "Camadas da Unreal Engine",
+      title: "Camadas da Unreal Engine",
+      subtitle: "Do jogo ao hardware: 9 camadas e os fluxos que atravessam cada uma.",
+      toolbar: "Controles do diagrama",
+      zoomOut: "Diminuir zoom", zoomOutT: "Diminuir zoom (−)",
+      zoomIn: "Aumentar zoom", zoomInT: "Aumentar zoom (+)",
+      fit: "Ajustar", fitT: "Ajustar à tela (0)",
+      actualT: "Tamanho real (1)",
+      svgT: "Baixar como SVG (vetorial)",
+      pngT: "Baixar como PNG",
+      scaleT: "Resolução do PNG",
+      code: "Código", codeT: "Editar o código Mermaid",
+      flows: "Fluxos", flowsAria: "Realçar um fluxo", all: "Todos",
+      stageAria: "Diagrama: arraste para mover, use os controles para zoom",
+      hint: "Arraste para mover · <kbd>Ctrl</kbd> + roda ou pinça para zoom",
+      codeTitle: "Código Mermaid",
+      codeSub: 'Edite e aplique para redesenhar. <span style="font-family:var(--mono)">Ctrl + Enter</span> também aplica.',
+      apply: "Aplicar", reset: "Restaurar original", copy: "Copiar", dlTxt: "Baixar .txt",
+      langAria: "Idioma",
+      drawing: "Desenhando o diagrama…",
+      loadFail: "Não foi possível carregar a biblioteca Mermaid. Verifique a conexão e recarregue a página.",
+      saved: "Arquivo salvo: ",
+      declined: "Download cancelado.",
+      rateLimited: "Já existe um download aguardando confirmação.",
+      tooLarge: "Arquivo grande demais. Tente uma resolução menor.",
+      dlFail: "Não foi possível baixar aqui",
+      notReady: "O diagrama ainda não foi desenhado.",
+      makingPng: "Gerando PNG…",
+      pngFail: "Este navegador não conseguiu gerar o PNG. Baixe o SVG.",
+      updated: "Diagrama atualizado.",
+      copied: "Código copiado.",
+      selected: "Selecionado. Use Ctrl + C para copiar.",
+      file: "camadas-unreal-engine",
+      flowNames: { "1": "Input", "2": "Tick", "3": "Render", "4": "Física", "5": "Áudio", "6": "Assets", "7": "Rede", s: "Estrutura" }
+    }
+  };
+
+  var FLOWS = [
+    { key: "1", n: "①", color: "#2563eb" },
+    { key: "2", n: "②", color: "#7c3aed" },
+    { key: "3", n: "③", color: "#16a34a" },
+    { key: "4", n: "④", color: "#ea580c" },
+    { key: "5", n: "⑤", color: "#db2777" },
+    { key: "6", n: "⑥", color: "#0891b2" },
+    { key: "7", n: "⑦", color: "#a16207" },
+    { key: "s", n: "", color: "#9ca3af", dash: true }
+  ];
+  var CIRCLED = { "①": "1", "②": "2", "③": "3", "④": "4", "⑤": "5", "⑥": "6", "⑦": "7" };
+
+  var $ = function (id) { return document.getElementById(id); };
+  var stage = $("stage"), canvas = $("canvas"), statusEl = $("status");
+  var code = $("code");
+
+  var state = { x: 0, y: 0, s: 1, w: 0, h: 0, touched: false, active: null, flowSets: {}, lang: "en" };
+  var svgEl = null;
+  var renderCount = 0;
+  function T(k) { return I18N[state.lang][k]; }
+
+  // ---------- toast ----------
+  var toastTimer = null;
+  function toast(msg) {
+    var t = $("toast");
+    t.textContent = msg;
+    t.hidden = false;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { t.hidden = true; }, 2600);
+  }
+
+  // ---------- storage (conveniência local) ----------
+  var KEY_SRC = "ue-layers-mermaid-v2-", KEY_LANG = "ue-layers-lang";
+  function getItem(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+  function setItem(k, v) { try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) {} }
+  function savedSrc(lang) { return getItem(KEY_SRC + lang); }
+  function saveSrc(lang, v) { setItem(KEY_SRC + lang, v === ORIGINAL[lang] ? null : v); }
+
+  // ---------- mermaid loading ----------
+  var CDN = [
+    "https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.min.js",
+    "https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.4.1/mermaid.min.js",
+    "https://unpkg.com/mermaid@11.4.1/dist/mermaid.min.js"
+  ];
+  var mermaidP = null;
+  function loadMermaid() {
+    if (!mermaidP) mermaidP = tryCdn(0);
+    return mermaidP;
+  }
+  function tryCdn(i) {
+    return new Promise(function (resolve, reject) {
+      if (window.mermaid) return resolve(window.mermaid);
+      if (i >= CDN.length) { mermaidP = null; return reject({ loadFail: true }); }
+      var s = document.createElement("script");
+      s.src = CDN[i];
+      s.async = true;
+      s.onload = function () { window.mermaid ? resolve(window.mermaid) : tryCdn(i + 1).then(resolve, reject); };
+      s.onerror = function () { s.remove(); tryCdn(i + 1).then(resolve, reject); };
+      document.head.appendChild(s);
+    });
+  }
+  function errText(err) {
+    if (err && err.loadFail) return T("loadFail");
+    return (err && (err.message || err.str)) || String(err);
+  }
+
+  // ---------- fluxos ----------
+  function parseFlows(src) {
+    var sets = {};
+    FLOWS.forEach(function (f) { sets[f.key] = {}; });
+    var re = /^\s*([A-Za-z0-9_]+)\s*(<-->|-->|-\.->|==>|---)\s*(?:\|\s*"?([^|]*?)"?\s*\|)?\s*([A-Za-z0-9_]+)\s*$/;
+    src.split(/\r?\n/).forEach(function (line) {
+      var m = line.match(re);
+      if (!m) return;
+      var label = (m[3] || "").trim();
+      var k = CIRCLED[label.charAt(0)] || "s";
+      sets[k][m[1]] = true;
+      sets[k][m[4]] = true;
+    });
+    return sets;
+  }
+
+  function hexOf(styleStr) {
+    var m = (styleStr || "").toLowerCase().match(/stroke\s*:\s*(#[0-9a-f]{3,8})/);
+    return m ? m[1] : null;
+  }
+
+  function tagDiagram() {
+    if (!svgEl) return;
+    var colorToKey = {};
+    FLOWS.forEach(function (f) { colorToKey[f.color] = f.key; });
+    svgEl.querySelectorAll("path.flowchart-link, .edgePaths path").forEach(function (p) {
+      var k = colorToKey[hexOf(p.getAttribute("style"))];
+      if (k) p.setAttribute("data-flow", k);
+    });
+    svgEl.querySelectorAll(".edgeLabel").forEach(function (g) {
+      var txt = (g.textContent || "").trim();
+      if (!txt) return;
+      g.setAttribute("data-flow", CIRCLED[txt.charAt(0)] || "s");
+    });
+    svgEl.querySelectorAll("g.node").forEach(function (g) {
+      var m = (g.id || "").match(/flowchart-(.+)-\d+$/);
+      if (m) g.setAttribute("data-node", m[1]);
+    });
+  }
+
+  function applyHighlight() {
+    var k = state.active;
+    document.querySelectorAll(".chip").forEach(function (c) {
+      var ck = c.getAttribute("data-k");
+      c.setAttribute("aria-pressed", String(ck === "" ? !k : ck === k));
+    });
+    if (!svgEl) return;
+    svgEl.classList.toggle("hl", !!k);
+    var nodes = k ? state.flowSets[k] || {} : {};
+    svgEl.querySelectorAll("[data-flow]").forEach(function (el) {
+      el.classList.toggle("on", !!k && el.getAttribute("data-flow") === k);
+    });
+    svgEl.querySelectorAll("g.node").forEach(function (g) {
+      g.classList.toggle("on", !!k && !!nodes[g.getAttribute("data-node")]);
+    });
+  }
+
+  function buildChips() {
+    var nav = $("flows");
+    var all = document.createElement("button");
+    all.type = "button";
+    all.className = "chip all";
+    all.setAttribute("data-k", "");
+    all.innerHTML = '<span class="nm"></span>';
+    nav.appendChild(all);
+    FLOWS.forEach(function (f) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "chip";
+      b.setAttribute("data-k", f.key);
+      b.style.setProperty("--c", f.color);
+      b.innerHTML = '<span class="sw' + (f.dash ? " dash" : "") + '"></span>' +
+        (f.n ? '<span class="n">' + f.n + "</span>" : "") + '<span class="nm"></span>';
+      nav.appendChild(b);
+    });
+    nav.addEventListener("click", function (e) {
+      var c = e.target.closest(".chip");
+      if (!c) return;
+      var k = c.getAttribute("data-k");
+      state.active = !k || state.active === k ? null : k;
+      applyHighlight();
+    });
+  }
+  function labelChips() {
+    var names = T("flowNames");
+    document.querySelectorAll(".chip").forEach(function (c) {
+      var k = c.getAttribute("data-k");
+      c.querySelector(".nm").textContent = k ? names[k] : T("all");
+    });
+  }
+
+  // ---------- render ----------
+  var reqSeq = 0;
+  function render(src) {
+    var my = ++reqSeq;
+    statusEl.hidden = false;
+    statusEl.className = "status";
+    statusEl.textContent = T("drawing");
+    if (svgEl) statusEl.hidden = true;
+    return loadMermaid().then(function (mermaid) {
+      mermaid.initialize({
+        startOnLoad: false,
+        securityLevel: "strict",
+        theme: "base",
+        fontFamily: DIAGRAM_FONT,
+        themeVariables: {
+          fontFamily: DIAGRAM_FONT,
+          primaryColor: "#ffffff",
+          primaryBorderColor: "#64748b",
+          primaryTextColor: "#111827",
+          lineColor: "#64748b",
+          clusterBkg: "#f8fafc",
+          clusterBorder: "#94a3b8",
+          edgeLabelBackground: "#ffffff",
+          titleColor: "#111827"
+        },
+        flowchart: { htmlLabels: true, useMaxWidth: false, padding: 10 }
+      });
+      renderCount += 1;
+      return mermaid.render("ue-diagram-" + renderCount, src);
+    }).then(function (out) {
+      if (my !== reqSeq) return false;
+      canvas.innerHTML = out.svg;
+      svgEl = canvas.querySelector("svg");
+      svgEl.removeAttribute("style");
+      var vb = svgEl.viewBox && svgEl.viewBox.baseVal;
+      var w = vb && vb.width ? vb.width : svgEl.getBBox().width;
+      var h = vb && vb.height ? vb.height : svgEl.getBBox().height;
+      state.w = w; state.h = h;
+      svgEl.setAttribute("width", w);
+      svgEl.setAttribute("height", h);
+      if (out.bindFunctions) out.bindFunctions(svgEl);
+      state.flowSets = parseFlows(src);
+      tagDiagram();
+      applyHighlight();
+      statusEl.hidden = true;
+      if (!state.touched) fit();
+      else apply();
+      return true;
+    }).catch(function (err) {
+      if (!svgEl) {
+        statusEl.hidden = false;
+        statusEl.className = "status err";
+        statusEl.textContent = errText(err);
+      }
+      document.querySelectorAll('body > [id^="due-diagram-"], body > [id^="ue-diagram-"]').forEach(function (n) { n.remove(); });
+      throw err;
+    });
+  }
+
+  // ---------- idioma ----------
+  function applyTexts() {
+    var d = I18N[state.lang];
+    document.documentElement.lang = state.lang === "pt" ? "pt-BR" : "en";
+    document.title = d.docTitle;
+    document.querySelectorAll("[data-i18n]").forEach(function (el) { el.textContent = d[el.getAttribute("data-i18n")]; });
+    document.querySelectorAll("[data-i18n-html]").forEach(function (el) { el.innerHTML = d[el.getAttribute("data-i18n-html")]; });
+    document.querySelectorAll("[data-i18n-title]").forEach(function (el) { el.title = d[el.getAttribute("data-i18n-title")]; });
+    document.querySelectorAll("[data-i18n-aria]").forEach(function (el) { el.setAttribute("aria-label", d[el.getAttribute("data-i18n-aria")]); });
+    document.querySelectorAll(".lang button").forEach(function (b) {
+      b.setAttribute("aria-pressed", String(b.getAttribute("data-lang") === state.lang));
+    });
+    labelChips();
+    if (!statusEl.hidden && !statusEl.classList.contains("err")) statusEl.textContent = d.drawing;
+  }
+
+  function setLang(lang, first) {
+    if (!I18N[lang]) lang = "en";
+    if (!first && lang === state.lang) return;
+    state.lang = lang;
+    setItem(KEY_LANG, lang);
+    applyTexts();
+    $("codeErr").hidden = true;
+    var saved = savedSrc(lang);
+    var src = saved || ORIGINAL[lang];
+    code.value = src;
+    render(src).catch(function () {
+      if (saved) {
+        code.value = ORIGINAL[lang];
+        render(ORIGINAL[lang]).catch(function () {});
+      }
+    });
+  }
+
+  document.querySelectorAll(".lang button").forEach(function (b) {
+    b.addEventListener("click", function () {
+      var l = b.getAttribute("data-lang");
+      setLang(l);
+      try { history.replaceState(null, "", "#" + l); } catch (e) {}
+    });
+  });
+
+  // ---------- pan & zoom ----------
+  var MIN = 0.08, MAX = 6;
+  function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+  function apply() {
+    canvas.style.transform = "translate(" + state.x + "px," + state.y + "px) scale(" + state.s + ")";
+    $("zoomVal").textContent = Math.round(state.s * 100) + "%";
+  }
+  function zoomAt(factor, cx, cy) {
+    var ns = clamp(state.s * factor, MIN, MAX);
+    var r = ns / state.s;
+    state.x = cx - (cx - state.x) * r;
+    state.y = cy - (cy - state.y) * r;
+    state.s = ns;
+    apply();
+  }
+  function center() {
+    var r = stage.getBoundingClientRect();
+    return [r.width / 2, r.height / 2];
+  }
+  function fit() {
+    if (!state.w) return;
+    var r = stage.getBoundingClientRect();
+    var pad = 24;
+    var s = Math.min((r.width - pad * 2) / state.w, (r.height - pad * 2) / state.h);
+    state.s = clamp(s, MIN, MAX);
+    state.x = (r.width - state.w * state.s) / 2;
+    state.y = Math.max(pad, (r.height - state.h * state.s) / 2);
+    apply();
+  }
+  function actual() {
+    var c = center();
+    var px = (c[0] - state.x) / state.s, py = (c[1] - state.y) / state.s;
+    state.s = 1;
+    state.x = c[0] - px;
+    state.y = c[1] - py;
+    apply();
+  }
+
+  $("zoomIn").addEventListener("click", function () { state.touched = true; var c = center(); zoomAt(1.25, c[0], c[1]); });
+  $("zoomOut").addEventListener("click", function () { state.touched = true; var c = center(); zoomAt(1 / 1.25, c[0], c[1]); });
+  $("fit").addEventListener("click", function () { state.touched = false; fit(); });
+  $("actual").addEventListener("click", function () { state.touched = true; actual(); });
+
+  stage.addEventListener("wheel", function (e) {
+    e.preventDefault();
+    state.touched = true;
+    var r = stage.getBoundingClientRect();
+    if (e.ctrlKey || e.metaKey) {
+      var f = Math.exp(-e.deltaY * (e.deltaMode === 1 ? 0.05 : 0.0022));
+      zoomAt(f, e.clientX - r.left, e.clientY - r.top);
+    } else {
+      var k = e.deltaMode === 1 ? 16 : 1;
+      state.x -= (e.shiftKey && !e.deltaX ? e.deltaY : e.deltaX) * k;
+      state.y -= (e.shiftKey && !e.deltaX ? 0 : e.deltaY) * k;
+      apply();
+    }
+  }, { passive: false });
+
+  var pointers = new Map();
+  var pinch = null;
+  stage.addEventListener("pointerdown", function (e) {
+    if (e.button !== 0 && e.pointerType === "mouse") return;
+    stage.setPointerCapture(e.pointerId);
+    pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    stage.classList.add("dragging");
+    state.touched = true;
+    if (pointers.size === 2) {
+      var p = Array.from(pointers.values());
+      pinch = { d: Math.hypot(p[0].x - p[1].x, p[0].y - p[1].y) };
+    }
+  });
+  stage.addEventListener("pointermove", function (e) {
+    if (!pointers.has(e.pointerId)) return;
+    var prev = pointers.get(e.pointerId);
+    var cur = { x: e.clientX, y: e.clientY };
+    pointers.set(e.pointerId, cur);
+    if (pointers.size === 1) {
+      state.x += cur.x - prev.x;
+      state.y += cur.y - prev.y;
+      apply();
+    } else if (pointers.size === 2 && pinch) {
+      var p = Array.from(pointers.values());
+      var d = Math.hypot(p[0].x - p[1].x, p[0].y - p[1].y);
+      var r = stage.getBoundingClientRect();
+      var mx = (p[0].x + p[1].x) / 2 - r.left, my = (p[0].y + p[1].y) / 2 - r.top;
+      state.x += (cur.x - prev.x) / 2;
+      state.y += (cur.y - prev.y) / 2;
+      if (pinch.d > 0) zoomAt(d / pinch.d, mx, my);
+      pinch.d = d;
+    }
+  });
+  function endPointer(e) {
+    pointers.delete(e.pointerId);
+    if (pointers.size < 2) pinch = null;
+    if (pointers.size === 0) stage.classList.remove("dragging");
+  }
+  stage.addEventListener("pointerup", endPointer);
+  stage.addEventListener("pointercancel", endPointer);
+
+  stage.addEventListener("keydown", function (e) {
+    var c = center(), step = 60;
+    if (e.key === "+" || e.key === "=") { zoomAt(1.25, c[0], c[1]); }
+    else if (e.key === "-" || e.key === "_") { zoomAt(0.8, c[0], c[1]); }
+    else if (e.key === "0") { state.touched = false; fit(); return; }
+    else if (e.key === "1") { actual(); }
+    else if (e.key === "ArrowLeft") { state.x += step; apply(); }
+    else if (e.key === "ArrowRight") { state.x -= step; apply(); }
+    else if (e.key === "ArrowUp") { state.y += step; apply(); }
+    else if (e.key === "ArrowDown") { state.y -= step; apply(); }
+    else return;
+    e.preventDefault();
+    state.touched = true;
+  });
+
+  if (window.ResizeObserver) new ResizeObserver(function () { if (!state.touched) fit(); }).observe(stage);
+
+  // ---------- export ----------
+  var downloadsP = (window.claude && typeof window.claude.use === "function")
+    ? window.claude.use("downloads").catch(function () { return null; })
+    : Promise.resolve(null);
+
+  function exportSvgString() {
+    var clone = svgEl.cloneNode(true);
+    clone.classList.remove("hl");
+    clone.querySelectorAll(".on").forEach(function (n) { n.classList.remove("on"); });
+    clone.querySelectorAll("[data-flow],[data-node]").forEach(function (n) {
+      n.removeAttribute("data-flow"); n.removeAttribute("data-node");
+    });
+    clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+    clone.setAttribute("xmlns:xlink", "http://www.w3.org/1999/xlink");
+    clone.setAttribute("width", Math.ceil(state.w));
+    clone.setAttribute("height", Math.ceil(state.h));
+    var vb = svgEl.viewBox.baseVal;
+    var bg = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+    bg.setAttribute("x", vb.x); bg.setAttribute("y", vb.y);
+    bg.setAttribute("width", vb.width); bg.setAttribute("height", vb.height);
+    bg.setAttribute("fill", "#ffffff");
+    clone.insertBefore(bg, clone.firstChild);
+    var str = new XMLSerializer().serializeToString(clone);
+    if (str.indexOf("<?xml") !== 0) str = '<?xml version="1.0" encoding="UTF-8"?>\n' + str;
+    return str;
+  }
+
+  function offer(filename, data) {
+    return downloadsP.then(function (dl) {
+      if (dl) {
+        return dl.save({ filename: filename, data: data }).then(function () {
+          toast(T("saved") + filename);
+        }, function (err) {
+          var c = err && err.code;
+          if (c === "declined") toast(T("declined"));
+          else if (c === "rate_limited") toast(T("rateLimited"));
+          else if (c === "too_large") toast(T("tooLarge"));
+          else toast(T("dlFail") + " (" + (c || "error") + ").");
+        });
+      }
+      var blob = data instanceof Blob ? data : new Blob([data], { type: "text/plain" });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement("a");
+      a.href = url; a.download = filename;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
+    });
+  }
+
+  function needDiagram() {
+    if (!svgEl) { toast(T("notReady")); return false; }
+    return true;
+  }
+
+  $("dlSvg").addEventListener("click", function () {
+    if (!needDiagram()) return;
+    offer(T("file") + ".svg", new Blob([exportSvgString()], { type: "image/svg+xml" }));
+  });
+
+  function toPng(scale) {
+    return new Promise(function (resolve, reject) {
+      var s = exportSvgString();
+      var img = new Image();
+      img.decoding = "async";
+      img.onload = function () {
+        var tryScale = function (sc) {
+          var W = Math.round(state.w * sc), H = Math.round(state.h * sc);
+          var maxSide = 16000, maxArea = 120e6;
+          if (W > maxSide || H > maxSide || W * H > maxArea) {
+            var k = Math.min(maxSide / W, maxSide / H, Math.sqrt(maxArea / (W * H)));
+            return tryScale(sc * k * 0.98);
+          }
+          var cv = document.createElement("canvas");
+          cv.width = W; cv.height = H;
+          var ctx = cv.getContext("2d");
+          ctx.fillStyle = "#ffffff";
+          ctx.fillRect(0, 0, W, H);
+          ctx.drawImage(img, 0, 0, W, H);
+          try {
+            cv.toBlob(function (b) {
+              if (b) resolve(b);
+              else if (sc > 1.01) tryScale(Math.max(1, sc / 2));
+              else reject(new Error("canvas"));
+            }, "image/png");
+          } catch (e) { reject(e); }
+        };
+        tryScale(scale);
+      };
+      img.onerror = function () { reject(new Error("img")); };
+      img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(s);
+    });
+  }
+
+  $("dlPng").addEventListener("click", function () {
+    if (!needDiagram()) return;
+    var btn = this;
+    btn.disabled = true;
+    var sc = parseFloat($("pngScale").value) || 2;
+    toast(T("makingPng"));
+    toPng(sc).then(function (blob) {
+      return offer(T("file") + "@" + sc + "x.png", blob);
+    }, function () {
+      toast(T("pngFail"));
+    }).then(function () { btn.disabled = false; });
+  });
+
+  // ---------- editor ----------
+  var editor = $("editor");
+  $("toggleEditor").addEventListener("click", function () {
+    var open = editor.hidden;
+    editor.hidden = !open;
+    this.setAttribute("aria-pressed", String(open));
+    if (open) code.focus();
+  });
+
+  function applyCode() {
+    var v = code.value, lang = state.lang;
+    $("codeErr").hidden = true;
+    render(v).then(function () {
+      saveSrc(lang, v);
+      toast(T("updated"));
+    }, function (err) {
+      var e = $("codeErr");
+      e.textContent = errText(err);
+      e.hidden = false;
+    });
+  }
+  $("apply").addEventListener("click", applyCode);
+  code.addEventListener("keydown", function (e) {
+    if ((e.ctrlKey || e.metaKey) && e.key === "Enter") { e.preventDefault(); applyCode(); }
+    if (e.key === "Tab") {
+      e.preventDefault();
+      code.setRangeText("  ", code.selectionStart, code.selectionEnd, "end");
+    }
+  });
+  $("reset").addEventListener("click", function () {
+    code.value = ORIGINAL[state.lang];
+    applyCode();
+  });
+  $("copy").addEventListener("click", function () {
+    var fallback = function () { code.focus(); code.select(); toast(T("selected")); };
+    try {
+      navigator.clipboard.writeText(code.value).then(function () { toast(T("copied")); }, fallback);
+    } catch (e) { fallback(); }
+  });
+  $("dlMmd").addEventListener("click", function () {
+    offer(T("file") + ".mmd.txt", code.value);
+  });
+
+  // ---------- boot ----------
+  buildChips();
+  var hash = (location.hash || "").replace("#", "").toLowerCase();
+  var startLang = (hash === "pt" || hash === "en") ? hash : (getItem(KEY_LANG) || "en");
+  setLang(startLang, true);
+})();
+</script>
+
+</body>
+</html>
